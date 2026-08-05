@@ -906,9 +906,11 @@ function exportRecord() {
     .map((row) => row.map(csvEscape).join(","))
     .join("\n");
   const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
+  const createdAt = new Date();
+  const stamp = createdAt.toISOString().replace(/[-:]/g, "").replace("T", "-").slice(0, 15);
   downloadBlob(
     blob,
-    `132kv-h-type-96cap-${lastRecord.phase.toLowerCase()}-unbalanced-current-${new Date().toISOString().slice(0, 10)}.csv`,
+    `132kv-h-type-96cap-${lastRecord.phase.toLowerCase()}-unbalanced-current-${stamp}.csv`,
   );
 }
 
