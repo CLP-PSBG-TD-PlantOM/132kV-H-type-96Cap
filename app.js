@@ -153,16 +153,8 @@ function isDisplayedZeroMA(value) {
   return value.toFixed(3) === "0.000";
 }
 
-function formatA(value) {
-  return `${value.toFixed(6)} A`;
-}
-
 function formatUf(value) {
   return `${value.toFixed(6)} uF`;
-}
-
-function formatPercent(value) {
-  return `${value.toFixed(4)}%`;
 }
 
 function setFileStatus(message, isError = false) {
@@ -189,7 +181,6 @@ function equivalentSeries(groups) {
 }
 
 function calculate(layout, system = getSystem()) {
-  const groupUf = {};
   const armGroups = {};
   const armUf = {};
 
@@ -204,9 +195,6 @@ function calculate(layout, system = getSystem()) {
 
   ARM_ORDER.forEach((arm) => {
     armUf[arm] = equivalentSeries(armGroups[arm]);
-    armGroups[arm].forEach((value, groupIndex) => {
-      groupUf[`${arm}${groupIndex + 1}`] = value;
-    });
   });
 
   const c1 = armUf.C1;
@@ -219,38 +207,17 @@ function calculate(layout, system = getSystem()) {
   const omega = 2 * Math.PI * system.frequency;
   const totalCurrentA = system.sourceVoltage * omega * totalUf * 1e-6;
   const i1 = cTop > 0 ? totalCurrentA * (c1 / cTop) : 0;
-  const i3 = cTop > 0 ? totalCurrentA * (c3 / cTop) : 0;
   const i2 = cBottom > 0 ? totalCurrentA * (c2 / cBottom) : 0;
-  const i4 = cBottom > 0 ? totalCurrentA * (c4 / cBottom) : 0;
   const unbalanceA = Math.abs(i1 - i2);
   const unbalanceMA = unbalanceA * 1000;
   const secondaryUnbalanceMA = unbalanceMA / system.ctRatio;
-  const secondaryUnbalanceA = unbalanceA / system.ctRatio;
-  const balanceNumerator = c1 * c4 - c3 * c2;
-  const balanceDenominator = c1 * c4 + c3 * c2;
-  const balanceErrorPercent =
-    balanceDenominator !== 0 ? (balanceNumerator / balanceDenominator) * 100 : 0;
-  const bridgeFormulaA =
-    c1 + c2 + c3 + c4 > 0
-      ? omega * system.sourceVoltage * Math.abs(balanceNumerator / (c1 + c2 + c3 + c4)) * 1e-6
-      : 0;
 
   return {
     unbalanceMA,
     unbalanceA,
     secondaryUnbalanceMA,
-    secondaryUnbalanceA,
     armUf,
-    armGroups,
     totalUf,
-    totalCurrentA,
-    i1,
-    i2,
-    i3,
-    i4,
-    balanceNumerator,
-    balanceErrorPercent,
-    bridgeFormulaA,
     system,
   };
 }
